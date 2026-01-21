@@ -6,7 +6,10 @@ import {
   renameFile, 
   deleteFile, 
   getFileLink,
-  searchFiles 
+  searchFiles,
+  getTrashFiles,
+  restoreFile,
+  deleteFilePermanently
 } from '../controllers/fileController';
 import { requireAuth } from '../middleware/authMiddleware';
 
@@ -16,24 +19,21 @@ const router = Router();
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-// 1. Upload File (POST /api/files/upload)
+// 1. Upload File
 router.post('/upload', requireAuth, upload.single('file'), uploadFile);
 
-// 2. List All Files (GET /api/files)
+// 2. List Active Files
 router.get('/', requireAuth, listFiles);
 
-// 3. Search Files (GET /api/files/search)
-// CRITICAL: This route must come BEFORE /:id routes.
-// If it comes after, Express will think the word "search" is a File ID.
+// 3. Search & Trash Routes (MUST be before /:id)
 router.get('/search', requireAuth, searchFiles);
+router.get('/trash', requireAuth, getTrashFiles);
 
-// 4. Rename File (PATCH /api/files/:id)
-router.patch('/:id', requireAuth, renameFile);
-
-// 5. Move to Trash / Soft Delete (DELETE /api/files/:id)
-router.delete('/:id', requireAuth, deleteFile);
-
-// 6. Get Secure Download Link (GET /api/files/:id/link)
-router.get('/:id/link', requireAuth, getFileLink);
+// 4. File Specific Operations (Require ID)
+router.patch('/:id', requireAuth, renameFile);         // Rename
+router.delete('/:id', requireAuth, deleteFile);        // Soft Delete (Move to Trash)
+router.get('/:id/link', requireAuth, getFileLink);     // Get Download Link
+router.post('/:id/restore', requireAuth, restoreFile); // Restore from Trash
+router.delete('/:id/permanent', requireAuth, deleteFilePermanently); // Delete Forever
 
 export default router;
