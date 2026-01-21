@@ -9,7 +9,8 @@ import {
   searchFiles,
   getTrashFiles,
   restoreFile,
-  deleteFilePermanently
+  deleteFilePermanently,
+  toggleFavorite // <--- New Import
 } from '../controllers/fileController';
 import { requireAuth } from '../middleware/authMiddleware';
 
@@ -25,14 +26,17 @@ router.post('/upload', requireAuth, upload.single('file'), uploadFile);
 // 2. List Active Files
 router.get('/', requireAuth, listFiles);
 
-// 3. Search & Trash Routes (MUST be before /:id)
+// 3. Special Routes (MUST be defined before /:id routes)
 router.get('/search', requireAuth, searchFiles);
 router.get('/trash', requireAuth, getTrashFiles);
 
 // 4. File Specific Operations (Require ID)
 router.patch('/:id', requireAuth, renameFile);         // Rename
+router.patch('/:id/favorite', requireAuth, toggleFavorite); // Toggle Favorite (New)
 router.delete('/:id', requireAuth, deleteFile);        // Soft Delete (Move to Trash)
-router.get('/:id/link', requireAuth, getFileLink);     // Get Download Link
+router.get('/:id/link', requireAuth, getFileLink);     // Get Download/Share Link
+
+// 5. Trash Operations
 router.post('/:id/restore', requireAuth, restoreFile); // Restore from Trash
 router.delete('/:id/permanent', requireAuth, deleteFilePermanently); // Delete Forever
 
