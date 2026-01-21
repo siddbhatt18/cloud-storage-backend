@@ -245,3 +245,39 @@ export const deleteFilePermanently = async (req: AuthRequest, res: Response): Pr
     res.status(500).json({ error: error.message });
   }
 };
+
+// 10. Toggle Favorite
+export const toggleFavorite = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const user = req.user;
+
+    // 1. Check current status
+    const { data: file, error: fetchError } = await supabase
+      .from('files')
+      .select('is_favorite')
+      .eq('id', id)
+      .eq('owner_id', user.id)
+      .single();
+
+    if (fetchError || !file) {
+      res.status(404).json({ error: 'File not found' });
+      return;
+    }
+
+    // 2. Toggle the status (true -> false, or false -> true)
+    const newStatus = !file.is_favorite;
+
+    const { error: updateError } = await supabase
+      .from('files')
+      .update({ is_favorite: newStatus })
+      .eq('id', id)
+      .eq('owner_id', user.id);
+
+    if (updateError) throw updateError;
+
+    res.status(200).json({ message: 'Favorite updated', is_favorite: newStatus });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
