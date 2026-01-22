@@ -1,4 +1,4 @@
-# Cloud Storage Backend
+# CloudBox - Cloud Storage Backend
 
 A robust RESTful API for cloud file storage built with Node.js, Express, TypeScript, and Supabase. This backend service provides comprehensive file management capabilities including upload, download, sharing, trash management, and folder organization.
 
